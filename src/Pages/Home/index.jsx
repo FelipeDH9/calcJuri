@@ -1,23 +1,26 @@
 import '../../App.css'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 function Home() {
-  const [processo, setProcesso] = useState(0)
+  const [processo, setProcesso] = useState('')
   const [honorarios, setHonorarios] = useState(10)
+  const [bloqueado, setBloqueado] = useState('')
 
   const [guia, setGuia] = useState('')
   const [guias, setGuias] = useState([])
-  const [total, setTotal] = useState(0)
-  
+  const [totalGuias, setTotalGuias] = useState(0)
 
-  const taxaMulta = 0.1
+  const [radio, setRadio] = useState("0.02")
 
-  const indice = 0.075
+  let valorHonorario = (processo * parseFloat(honorarios /100)).toFixed(2)
+  let valorJuros = (processo * 0.01).toFixed(2)
+  let valorMulta = (radio * processo).toFixed(2)
+
+  function handleRadio(event){
+    setRadio(event.target.value)
+  }
+
   const selic = 0.105
-  let totalIndices = indice + selic
-
-
-
 
   function handleInputChange (e){
     setGuia(e.target.value)
@@ -29,20 +32,31 @@ function Home() {
     if (!isNaN(numberValue) && guia.trim() !== '' && numberValue > 0){
       setGuias([...guias, numberValue])
       setGuia('')
-      setTotal((total + parseFloat(guia)))
+      setTotalGuias((totalGuias + parseFloat(guia)))
             
     } else {
       alert("deve ser um numero valido")
     }
   }
 
+  // Função para apagar a guia
+  function handleRemoverGuia (index, number) {
+    setGuias(guias.filter((_, i) => i !== index));
+    setTotalGuias(totalGuias - number)
+  };
 
+  function reset(){
+    setProcesso('')
+    setHonorarios(10)
+    setBloqueado('')
+    setGuia('')
+    setGuias([])
+    setTotalGuias(0)
+    setRadio("0.02")
+  }
 
-    // Função para apagar a guia
-    const handleRemoverGuia = (index, number) => {
-      setGuias(guias.filter((_, i) => i !== index));
-      setTotal(total - number)
-    };
+  useEffect(() => {
+  }, [])
 
   return (
     <div className="App">
@@ -52,14 +66,34 @@ function Home() {
 
       <form>
         <label htmlFor="processo">Valor do processo</label>
-        <input type="number" name="processo" id="processo"  placeholder='###' onChange={value => setProcesso(value.target.value)} />
+        <input type="number" name="processo" id="processo"  value={processo} onChange={value => setProcesso(value.target.value)} />
       </form>
 
       <form>
         <label htmlFor="honorarios">Taxa de honorarios</label>
-        <input type="number" name="honorarios" id="honorarios"  placeholder='10% por padrão' onChange={value => setHonorarios(value.target.value)} />
+        <input type="number" name="honorarios" id="honorarios" value={honorarios} onChange={value => setHonorarios(value.target.value)} />
       </form>
-   
+
+      <form>
+        <label htmlFor="bloqueado">Valor bloqueado</label>
+        <input type="number" name="bloqueado" id="bloqueado"  value={bloqueado} onChange={value => setBloqueado(value.target.value)} />
+      </form>
+
+      {/* Radio button */}
+      <h4>Tipo de processo:</h4>
+      <div>
+        <div>
+          <input type="radio" id="mensalidade" value="0.02" checked={radio === "0.02"} onChange={handleRadio}/>
+          <label htmlFor="mensalidade">Mensalidade - 2%</label>
+        </div>
+        <div>
+          <input type="radio" id="acordo" value="0.1" checked={radio === "0.1"} onChange={handleRadio}/>
+          <label htmlFor="mensalidade">Acordo - 10%</label>
+        </div>
+      </div>
+      
+
+
       <br></br>
 
       <form>
@@ -69,10 +103,21 @@ function Home() {
         <button onClick={handleGuias}>Adicionar valor</button>
       </form>
 
+
+      <hr/>
+
+
+      <h2>Valor do processo: R$ {(processo * 1).toFixed(2)}</h2>
+      <h2>Honorarios advocaticios: R$ {valorHonorario}</h2>
+      <h2>Juros de 1% sobre valor do processo: R$ {valorJuros}</h2>
+      <h2>Multa {radio * 100}% de acordo com o tipo selecionado: R$ {valorMulta}</h2>
+      <h2>Valor bloqueado da pessoa: R$ {(bloqueado*1).toFixed(2)}</h2>
+    
+
       {guias.length > 0 ? 
         (
           <>
-            <h2>Valor total das guias: {total.toFixed(2)}</h2>
+            <h2>Valor total das guias: R$ {totalGuias.toFixed(2)}</h2>
             <h3>Valores das guias</h3>
           </>
         ) : 
@@ -84,9 +129,11 @@ function Home() {
           <li key={index}>Guia nº {index +1} - R$ {number} <button onClick={()=> handleRemoverGuia(index, number)}>X</button></li>
         ))}
       </ul>
+        <button onClick={reset}>Resetar valores</button>
     </div>
 
   );
 }
 
 export default Home;
+

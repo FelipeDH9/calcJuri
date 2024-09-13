@@ -16,6 +16,9 @@ function Home() {
 
   return (
     <div className="App">
+      <header>
+        <h2>Calculadora</h2>
+      </header>
 
       <form action="">
         <label htmlFor="processo">Valor do processo</label>

@@ -4,15 +4,45 @@ import { useState } from 'react'
 function Home() {
   const [processo, setProcesso] = useState(0)
   const [honorarios, setHonorarios] = useState(10)
-  const [custo, setCusto] = useState([0])
-  const [custoB, setCustoB] = useState([0])
-  let total = 0
+
+  const [guia, setGuia] = useState('')
+  const [guias, setGuias] = useState([])
+  const [total, setTotal] = useState(0)
+  
+
   const taxaMulta = 0.1
 
   const indice = 0.075
   const selic = 0.105
   let totalIndices = indice + selic
-  let resultado = custo * indice
+
+
+
+
+  function handleInputChange (e){
+    setGuia(e.target.value)
+  }
+
+  function handleGuias(e){
+    e.preventDefault()
+    const numberValue = parseFloat(guia)
+    if (!isNaN(numberValue) && guia.trim() !== '' && numberValue > 0){
+      setGuias([...guias, numberValue])
+      setGuia('')
+      setTotal((total + parseFloat(guia)))
+            
+    } else {
+      alert("deve ser um numero valido")
+    }
+  }
+
+
+
+    // Função para apagar a guia
+    const handleRemoverGuia = (index, number) => {
+      setGuias(guias.filter((_, i) => i !== index));
+      setTotal(total - number)
+    };
 
   return (
     <div className="App">
@@ -20,36 +50,42 @@ function Home() {
         <h2>Calculadora</h2>
       </header>
 
-      <form action="">
+      <form>
         <label htmlFor="processo">Valor do processo</label>
-        <input type="number" name="processo" id="processo"  placeholder='###' onChange={value => setProcesso(value.target.value)} autofocus = "on"/>
+        <input type="number" name="processo" id="processo"  placeholder='###' onChange={value => setProcesso(value.target.value)} />
       </form>
 
-      <form action="">
+      <form>
         <label htmlFor="honorarios">Taxa de honorarios</label>
         <input type="number" name="honorarios" id="honorarios"  placeholder='10% por padrão' onChange={value => setHonorarios(value.target.value)} />
       </form>
-      
-      <form action="">
-        <label htmlFor="teste">Custo B da guia</label>
-        <input type="number" name="teste" id="teste"  placeholder='###' onChange={value => setCustoB(value.target.value)} />
+   
+      <br></br>
+
+      <form>
+        <label>Valor da guia:
+          <input type="number" name="guia" id="guia" value={guia} onChange={handleInputChange} autoFocus = "on"/>
+        </label>
+        <button onClick={handleGuias}>Adicionar valor</button>
       </form>
 
-      <p>Indice usado é o indice do art. 523: {indice * 100}%</p>
-      <p>Indice selic usado: {selic * 100}%</p>
-      <p>Honorarios: {honorarios * processo /100}</p>
+      {guias.length > 0 ? 
+        (
+          <>
+            <h2>Valor total das guias: {total.toFixed(2)}</h2>
+            <h3>Valores das guias</h3>
+          </>
+        ) : 
+        (<h3>Insira os valores das guias</h3>)
+      }
 
-      {total = parseInt(custo) + parseInt(custoB)}
-
-      {/* <p>{resultado}</p> */}
-      <p>Custo: {custo}</p>
-      <p>Custo B: {custoB}</p>
-      <p>Total: {total}</p>
-
-      <p>Total indices: {(totalIndices * 100)}%</p>
-
-      <h3>Valor final calculado: {total * totalIndices * taxaMulta}</h3>
+      <ul>
+        {guias?.map((number, index) =>(
+          <li key={index}>Guia nº {index +1} - R$ {number} <button onClick={()=> handleRemoverGuia(index, number)}>X</button></li>
+        ))}
+      </ul>
     </div>
+
   );
 }
 
